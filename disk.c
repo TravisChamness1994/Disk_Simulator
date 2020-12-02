@@ -18,7 +18,9 @@ CIDEV_RET_CODE lba2chs(lba_t lba, chs_t *chs)
     if (lba >= MAX_LOGICAL_BLOCK)
         return CIDEV_ADDRESS_ERROR;
 	
-    chs.cyl = 
+    chs->cyl = lba /(NUM_OF_HEADS*NUM_OF_SECTS);
+    chs->head = (lba / NUM_OF_SECTS) % NUM_OF_HEADS;
+    chs->sect = lba%(SECT_SIZE) + 1;
 // todo: implement
 
     return CIDEV_SUCCESS;
@@ -32,6 +34,10 @@ CIDEV_RET_CODE lba2chs(lba_t lba, chs_t *chs)
 CIDEV_RET_CODE chs2lba(chs_t *chs, lba_t *lba)
 {
 // todo: implement
+    if((chs->sect * chs->head * chs->sect) >= MAX_LOGICAL_BLOCK)
+        return CIDEV_ADDRESS_ERROR;
+
+    *lba = (chs->cyl * NUM_OF_CYLS + chs->head) * NUM_OF_SECTS + (chs->sect - 1);
 
     return CIDEV_SUCCESS;
 }
