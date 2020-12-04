@@ -40,10 +40,10 @@
 
 #endif
 
-#define NUM_OF_CYLS 8 // 256
+#define NUM_OF_CYLS 8
 #define NUM_OF_HEADS 10
-#define NUM_OF_SECTS 16 // 128
-#define SECT_SIZE 16 // 512
+#define NUM_OF_SECTS 16
+#define SECT_SIZE 16
 
 #define MAX_LOGICAL_BLOCK (NUM_OF_CYLS * NUM_OF_HEADS * NUM_OF_SECTS)
 
