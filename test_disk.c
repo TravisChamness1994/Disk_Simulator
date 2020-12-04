@@ -82,7 +82,9 @@ void testReadWrite()
       size = (((float) rand()) / RAND_MAX) * (MAX_LOGICAL_BLOCK * SECT_SIZE) + 1;
       lba = (((float) rand()) / RAND_MAX) * MAX_LOGICAL_BLOCK;
 
-      writeBuffer = generatePrintableContent(size);
+       printf("\nSize in TestDisk: %d\n", size);
+
+       writeBuffer = generatePrintableContent(size);
       if ((errorCode = writeDisk(lba, writeBuffer)) != CIDEV_SUCCESS)
       {
          printf("\n*** ERROR WRITING %d BYTES: %d\n\n", size, errorCode);

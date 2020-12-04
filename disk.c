@@ -37,7 +37,7 @@ CIDEV_RET_CODE chs2lba(chs_t *chs, lba_t *lba)
     if((chs->cyl * NUM_OF_HEADS * NUM_OF_SECTS) + (chs->sect) >= MAX_LOGICAL_BLOCK)
         return CIDEV_ADDRESS_ERROR;
 
-    *lba = (chs->cyl * NUM_OF_HEADS * NUM_OF_SECTS) +chs->head * NUM_OF_SECTS + (chs->sect);
+    *lba = (chs->cyl * NUM_OF_HEADS * NUM_OF_SECTS) + chs->head * NUM_OF_SECTS + (chs->sect);
 
     return CIDEV_SUCCESS;
 }
@@ -56,16 +56,18 @@ CIDEV_RET_CODE readDisk(lba_t lba, unsigned int size, char **buffer)
         return CIDEV_SPACE_ERROR;
 
     CIDEV_RET_CODE errCode = CIDEV_SUCCESS;
-    unsigned int numSectors = 0, i;
-
+    unsigned int numSectors = 0, i = 0, sizingVar = 0;
     //How many sectors do I need to read from?
     //Convert the lba to the correct chs data structs.
     //  utilizing an array for convenient chs loading
-    if(size % SECT_SIZE == 0)
-        numSectors = size/SECT_SIZE;
-    else
+    if(size % SECT_SIZE == 0) {
+        numSectors = size / SECT_SIZE;
+        sizingVar = size;
+    }
+    else {
         numSectors = (size / SECT_SIZE) + 1;
-
+        sizingVar = size + (SECT_SIZE - (size % SECT_SIZE));
+    }
     chs_t diskLocations[numSectors], chs;
 
     for (i = 0; i < numSectors; ++i) {
@@ -75,11 +77,16 @@ CIDEV_RET_CODE readDisk(lba_t lba, unsigned int size, char **buffer)
 
     // todo: implement
 
-    *buffer = (char*)malloc(sizeof(char*) * size + 1);
-    //Strncpy appends null terminating character at size location. Printf for testing string result.
+    *buffer = (char*)calloc(sizeof(char*), sizingVar + 1);
+    printf("\nSize Variable in Read: %d\n", size);
+
     for (i = 0; i < numSectors; i++) {
         chs = diskLocations[i];
-        strncat(*buffer, disk[chs.cyl][chs.head][chs.sect], SECT_SIZE);
+        if(i == numSectors - 1)
+            sizingVar = (size % SECT_SIZE);
+        else
+            sizingVar = SECT_SIZE;
+        strncat(*buffer, disk[chs.cyl][chs.head][chs.sect], sizingVar);
     }
     strcat(*buffer, "\0");
 
@@ -139,14 +146,12 @@ CIDEV_RET_CODE writeDisk(lba_t lba, char *buffer)
         return CIDEV_SPACE_ERROR;
     chs_t diskLocation[numberSector], chs;
 
-
     for (i = 0; i < numberSector; ++i) {
         if((errCode = lba2chs((lba + i) % MAX_LOGICAL_BLOCK, &diskLocation[i])) != CIDEV_SUCCESS)
             return errCode;
     }
 
 // todo: implement
-
     for (i = 0; i < numberSector; i++) {
         chs = diskLocation[i];
 
@@ -154,7 +159,8 @@ CIDEV_RET_CODE writeDisk(lba_t lba, char *buffer)
             sizeRemain = ( numberChars - i*SECT_SIZE ) % SECT_SIZE;
         else
             sizeRemain = SECT_SIZE;
-        strncat(disk[chs.cyl][chs.head][chs.sect], buffer + i*SECT_SIZE,sizeRemain);
+
+        strncpy(disk[chs.cyl][chs.head][chs.sect], buffer + i*SECT_SIZE,sizeRemain);
     }
 
     return errCode;
