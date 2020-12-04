@@ -8,7 +8,7 @@
 
 #ifdef __DEBUG_DISK
 
-int numberOfTrials; // global to allow passing it to the timeout handler
+int static numberOfTrials; // global to allow passing it to the timeout handler
 
 /**
  * Conditional compilation for testing the functionality of the simulated disk
