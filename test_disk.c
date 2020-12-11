@@ -1,3 +1,9 @@
+/*
+**Name: Travis Chamness
+**Project: 2 Task 2
+**Date: 12/9/2020
+*/
+
 //////////////////////////////////////////////////////////////////////////
 ///
 /// Copyright (c) 2020 Prof. AJ Bieszczad. All rights reserved.
@@ -153,7 +159,7 @@ void stop_timer(void) {
 }
 
 /***
- *
+ 
  * This function stress-tests the disk operation.
  *
  * It uses a timer to perform writing or reading randomly with random locations and chunk sizes.
@@ -166,7 +172,7 @@ void testWithTime(int sig) {
     time_t tm;
 
     time(&tm); // man 3 time
-    printf("\n\nTime: %s", ctime(&tm)); // man ctime
+    printf("\n\nTime: %s", ctime(&tm)); // man ctime ; Time Printed
 
     gettimeofday(&ts, NULL); // man gettimeofday
     printf("Time: %ld.%06ld secs.\n", (long) ts.tv_sec, (long) ts.tv_usec);
@@ -184,12 +190,14 @@ void testWithTime(int sig) {
     unsigned int size; // of the read or written chunk
 
     lba = rand() % MAX_LOGICAL_BLOCK + 1;
+    //Print lba & chs done
     printTransl(lba);
 
     size = (((float) rand() / RAND_MAX)) * (MAX_LOGICAL_BLOCK * SECT_SIZE) + 1;
 
     switch (rand() % 2) {
         case 0:
+	        printf("\nREAD TYPE\n");
             if ((errorCode = readDisk(lba, size, (void *) &readBuffer)) == CIDEV_SUCCESS) {
                 printf("READ %d bytes:\n%s\n", size, readBuffer);
                 free(readBuffer);
@@ -200,9 +208,13 @@ void testWithTime(int sig) {
 
         case 1:
             writeBuffer = generatePrintableContent(size);
-            if ((errorCode = writeDisk(lba, writeBuffer)) == CIDEV_SUCCESS)
+    	    printf("\nWRITE TYPE\n\n");
+            if ((errorCode = writeDisk(lba, writeBuffer)) == CIDEV_SUCCESS){
                 printf("WROTE %d bytes:\n%s\n", size, writeBuffer);
-            else
+//		printf("CHS: Cyl %d, Head %d, Sect %d\n", chs->cyl, chs->head, chs->sect);
+
+	    }
+	    else
                 printf("\n*** ERROR WRITING %d BYTES: %d\n\n", size, errorCode);
 
             free(writeBuffer);
@@ -281,12 +293,13 @@ int main(int argc, char *argv[])
 #if defined( __DEBUG_TIMER ) && defined ( __linux__ )
 
    srand(time(NULL));
-
+   printf("\n======= Entering Timer=========\n");
    signal(SIGALRM, testWithTime);
    start_timer();
 
    while (true); // let the timeout handler deal with exiting
 
+   printf("\n======== Exiting Timer =========\n");
 #  endif
 }
 

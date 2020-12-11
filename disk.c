@@ -1,3 +1,9 @@
+/*
+**Name: Travis Chamness
+**Project: 2 Task 1
+**Date: 12/4/2020
+*/
+
 //////////////////////////////////////////////////////////////////////////
 ///
 /// Copyright (c) 2020 Prof. AJ Bieszczad. All rights reserved.
@@ -56,7 +62,9 @@ CIDEV_RET_CODE readDisk(lba_t lba, unsigned int size, char **buffer)
         return CIDEV_SPACE_ERROR;
 
     CIDEV_RET_CODE errCode = CIDEV_SUCCESS;
-    unsigned int numSectors = 0, i = 0, sizingVar = 0;
+    unsigned int numSectors = 0,
+    i = 0,
+    sizingVar = 0;
     //How many sectors do I need to read from?
     //Convert the lba to the correct chs data structs.
     //  utilizing an array for convenient chs loading
@@ -82,11 +90,12 @@ CIDEV_RET_CODE readDisk(lba_t lba, unsigned int size, char **buffer)
 
     for (i = 0; i < numSectors; i++) {
         chs = diskLocations[i];
-        if(i == numSectors - 1)
-            sizingVar = (size % SECT_SIZE);
+        if((size / SECT_SIZE) == 0)
+            sizingVar = size;
         else
             sizingVar = SECT_SIZE;
         strncat(*buffer, disk[chs.cyl][chs.head][chs.sect], sizingVar);
+        size -= SECT_SIZE;
     }
     strcat(*buffer, "\0");
 
@@ -135,7 +144,7 @@ CIDEV_RET_CODE writeDisk(lba_t lba, char *buffer)
 
     CIDEV_RET_CODE errCode = CIDEV_SUCCESS;
     size_t  numberSector, numberChars = strlen(buffer);
-    int i, sizeRemain;
+    int i, sizeRemain = numberChars;
 
     if (numberChars % SECT_SIZE == 0)
         numberSector = numberChars / SECT_SIZE;
@@ -151,16 +160,26 @@ CIDEV_RET_CODE writeDisk(lba_t lba, char *buffer)
             return errCode;
     }
 
+
+    //Tester lba
+//    lba_t lba2;
+//    char *buffer2;
 // todo: implement
     for (i = 0; i < numberSector; i++) {
         chs = diskLocation[i];
 
-        if (i == numberSector - 1)
-            sizeRemain = ( numberChars - i*SECT_SIZE ) % SECT_SIZE;
+        if ((numberChars / SECT_SIZE) == 0)
+            sizeRemain = numberChars;
         else
             sizeRemain = SECT_SIZE;
 
-        strncpy(disk[chs.cyl][chs.head][chs.sect], buffer + i*SECT_SIZE,sizeRemain);
+
+        strncpy(disk[chs.cyl][chs.head][chs.sect], buffer + i*SECT_SIZE, sizeRemain);
+        numberChars -= SECT_SIZE;
+//        chs2lba(&diskLocation[i], &lba2);
+//        readDisk(lba2, sizeRemain, &buffer2);
+//        printf("%s\n", buffer2);
+//        fflush(stdout);
     }
 
     return errCode;
